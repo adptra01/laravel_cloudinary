@@ -89,9 +89,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 public function destroy($id)
 {
-    $media = Media::find($id);
     Cloudinary::destroy($media->file_name);
-    $media->delete();
     return back()->with('success', 'Image deleted from Cloudinary successfully');
 }
 ```
