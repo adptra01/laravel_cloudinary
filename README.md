@@ -1,14 +1,15 @@
-Dokumentasi untuk Cloudinary Laravel Package di dalam file `README.md` mungkin akan terlihat seperti ini:
+Tentu, berikut ini adalah versi yang telah diperbarui dari dokumen `README.md` dengan tambahan contoh penggunaan pada model `Media`:
 
 ```markdown
 # Cloudinary Laravel Package Documentation
 
-This documentation provides information and usage examples for the Cloudinary Laravel Package.
+Welcome to the documentation for the Cloudinary Laravel Package. This guide will help you understand how to install, configure, and use the Cloudinary Laravel integration in your Laravel applications.
 
 ## Installation
 
-To install the Cloudinary Laravel Package, you can use Composer:
+To install the Cloudinary Laravel Package, use Composer:
 
+```bash
 composer require cloudinary-labs/cloudinary-laravel
 ```
 
@@ -16,7 +17,7 @@ composer require cloudinary-labs/cloudinary-laravel
 
 1. Publish the configuration file:
 ```bash
-php artisan vendor:publish --provider="CloudinaryLabs\CloudinaryLaravel\ServiceProvider"
+php artisan vendor:publish --provider="CloudinaryLabs\CloudinaryLaravel\CloudinaryServiceProvider" --tag="cloudinary-laravel-migration"
 ```
 
 2. Add your Cloudinary credentials to the `.env` file:
@@ -28,15 +29,45 @@ CLOUDINARY_NOTIFICATION_URL=
 CLOUDINARY_URL=
 ```
 
+3. Connect models, for example using the `User` and `Media` models from the published vendor migration:
+```
+class User extends Model
+{
+    use MediaAlly;
+
+    ...
+
+    public function media()
+    {
+        return $this->morphMany(Media::class, 'medially');
+    }
+}
+
+class Media extends Model
+{
+    ...
+
+    // protected $guarded = [];
+
+    public function medially()
+    {
+        return $this->morphTo();
+    }
+}
+
+```
+
+
 ## Usage
 
-### Upload Image
+### Uploading Images
 
-You can use the Cloudinary Laravel package to easily upload images. Here's an example:
+You can easily upload images using the Cloudinary Laravel package. Here's an example:
 
 ```php
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
+use App\Models\Media; // Add this line
 
 public function store(Request $request)
 {
@@ -44,8 +75,14 @@ public function store(Request $request)
     try {
         $result = Cloudinary::upload($image->getRealPath(), ['public_id' => 'img'.rand()]);
 
-        // Save the uploaded image info to your database
-        // Create a new Media instance and save it to the user's media relationship
+        // Save uploaded image details to your database
+        $media = new Media([
+            'file_url' => $result->getSecurePath(),
+            'file_name' => $result->getPublicId(),
+            'file_type' => $result->getExtension(),
+            'size' => $result->getSize(),
+        ]);
+        $media->save();
 
         return back()->with('success', 'Image uploaded to Cloudinary successfully');
     } catch (\Throwable $th) {
@@ -54,13 +91,14 @@ public function store(Request $request)
 }
 ```
 
-### Update Image
+### Updating Images
 
 You can also update images using Cloudinary. Here's an example:
 
 ```php
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\Request;
+use App\Models\Media; // Add this line
 
 public function update($id, Request $request)
 {
@@ -71,7 +109,13 @@ public function update($id, Request $request)
 
         $result = Cloudinary::upload($image->getRealPath(), ['public_id' => 'img'.rand()]);
 
-        // Update the image info in your database
+        // Update image details in your database
+        $media->update([
+            'file_url' => $result->getSecurePath(),
+            'file_name' => $result->getPublicId(),
+            'file_type' => $result->getExtension(),
+            'size' => $result->getSize(),
+        ]);
 
         return back()->with('success', 'Image updated on Cloudinary successfully');
     } catch (\Throwable $th) {
@@ -80,23 +124,26 @@ public function update($id, Request $request)
 }
 ```
 
-### Delete Image
+### Deleting Images
 
 You can delete images from Cloudinary using the Cloudinary Laravel package. Here's an example:
 
 ```php
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use App\Models\Media; // Add this line
 
 public function destroy($id)
 {
+    $media = Media::find($id);
     Cloudinary::destroy($media->file_name);
+    $media->delete();
     return back()->with('success', 'Image deleted from Cloudinary successfully');
 }
 ```
 
-## Support
+## Need Help?
 
-For more information and advanced usage, refer to the official documentation of the Cloudinary Laravel Package.
+For more information and advanced usage, please refer to the official documentation of the Cloudinary Laravel Package.
 ```
 
-Anda dapat menambahkan informasi lebih lanjut, seperti bagaimana mengatur alur kerja untuk aplikasi Anda, menggunakan fitur tambahan dari paket Cloudinary Laravel, atau menambahkan contoh-contoh lain yang relevan. Pastikan untuk menyesuaikan informasi ini dengan kebutuhan dan detail spesifik aplikasi Anda.
+Pastikan Anda menyunting atau menambahkan bagian yang relevan jika diperlukan, dan pastikan informasinya akurat sesuai dengan kebutuhan aplikasi Anda.
