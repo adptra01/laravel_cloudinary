@@ -9,7 +9,6 @@ This documentation provides information and usage examples for the Cloudinary La
 
 To install the Cloudinary Laravel Package, you can use Composer:
 
-```bash
 composer require cloudinary-labs/cloudinary-laravel
 ```
 
